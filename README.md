@@ -17,7 +17,7 @@ AI coding assistant skills for Claude Code, Codex CLI, and GitHub Copilot.
 Register the marketplace first:
 
 ```
-/plugin marketplace add github:rolo145/rolo-skills
+/plugin marketplace add rolo145/rolo-skills
 ```
 
 Then install:
@@ -29,7 +29,7 @@ Then install:
 ### Claude Code — Direct install
 
 ```bash
-claude plugin install github:rolo145/rolo-skills
+claude plugin install rolo145/rolo-skills
 ```
 
 ### Any agent (via npx skills)
