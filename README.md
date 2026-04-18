@@ -32,7 +32,13 @@ Then install:
 claude plugin install github:rolo145/rolo-skills
 ```
 
-### OpenAI Codex CLI
+### Any agent (via npx skills)
+
+```bash
+npx skills add rolo145/rolo-skills
+```
+
+### OpenAI Codex CLI (manual)
 
 ```bash
 git clone https://github.com/rolo145/rolo-skills.git ~/.codex/rolo-skills
