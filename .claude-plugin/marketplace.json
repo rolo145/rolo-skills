@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "rolo-skills",
+  "description": "Roland's Claude Code skills and plugins",
+  "owner": {
+    "name": "Roland Botka",
+    "email": "rolandbotka@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "rolo-skills",
+      "description": "Roland's Claude Code skills",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "Roland Botka",
+        "email": "rolandbotka@gmail.com"
+      }
+    }
+  ]
+}

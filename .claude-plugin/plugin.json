@@ -1,0 +1,16 @@
+{
+  "name": "rolo-skills",
+  "description": "Roland's Claude Code skills",
+  "version": "1.0.0",
+  "author": {
+    "name": "Roland Botka",
+    "email": "rolandbotka@gmail.com"
+  },
+  "homepage": "https://github.com/rolo145/rolo-skills",
+  "repository": "https://github.com/rolo145/rolo-skills",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "productivity"
+  ]
+}
