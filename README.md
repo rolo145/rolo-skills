@@ -21,7 +21,8 @@ Auto-detects all installed agents. Use `-a claude-code`, `-a codex`, etc. to tar
 ### Claude Code (direct)
 
 ```bash
-claude plugin install rolo145/rolo-skills
+claude plugin marketplace add rolo145/rolo-skills
+claude plugin install rolo-skills
 ```
 
 ### OpenAI Codex CLI (manual)
