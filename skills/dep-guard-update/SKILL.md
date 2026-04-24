@@ -1,6 +1,6 @@
 ---
 name: dep-guard-update
-description: Use when user explicitly asks to update npm dependencies, analyze dependency risks, check package changelogs, or run dep-guard security checks. Covers both interactive install and risk-analysis-only modes.
+description: Use when user explicitly asks to update npm dependencies, analyze dependency risks, check package changelogs, or run dep-guard security checks.
 ---
 
 # dep-guard Update Workflow
@@ -57,7 +57,7 @@ Ask per-package: "Install [package]? (yes/skip)"
 
 Rejected packages are removed. If none remain, stop.
 
-### Step 3 — Install via SCFW
+### Step 3 — Install via SCFW (Supply Chain Firewall)
 
 ```bash
 dep-guard scfw <pkg1@ver1> <pkg2@ver2> ... --json
@@ -97,7 +97,7 @@ dep-guard update --dry-run --json
 
 ### Step 2 — Research each package
 
-For each update (use parallel subagents if many packages):
+For each update (use parallel subagents if 3+ packages):
 
 1. Fetch changelog / release notes from GitHub releases or the npm page
 2. Identify: breaking changes, security fixes, deprecations, API surface changes

@@ -10,32 +10,18 @@ AI coding assistant skills for Claude Code, Codex CLI, and GitHub Copilot.
 
 ## Installation
 
-**Note:** Installation differs by platform.
-
-### Claude Code — Marketplace
-
-Register the marketplace first:
-
-```
-/plugin marketplace add rolo145/rolo-skills
-```
-
-Then install:
-
-```
-/plugin install rolo-skills@rolo-skills
-```
-
-### Claude Code — Direct install
-
-```bash
-claude plugin install rolo145/rolo-skills
-```
-
 ### Any agent (via npx skills)
 
 ```bash
 npx skills add rolo145/rolo-skills
+```
+
+Auto-detects all installed agents. Use `-a claude-code`, `-a codex`, etc. to target specific ones.
+
+### Claude Code (direct)
+
+```bash
+claude plugin install rolo145/rolo-skills
 ```
 
 ### OpenAI Codex CLI (manual)
