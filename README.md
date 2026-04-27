@@ -7,6 +7,7 @@ AI coding assistant skills for Claude Code, Codex CLI, and GitHub Copilot.
 | Skill | Description |
 |---|---|
 | [dep-guard-update](skills/dep-guard-update/SKILL.md) | npm dependency updates via dep-guard CLI |
+| [llm-wiki](skills/llm-wiki/SKILL.md) | Build and maintain a persistent personal knowledge base with an LLM |
 
 ## Installation
 
