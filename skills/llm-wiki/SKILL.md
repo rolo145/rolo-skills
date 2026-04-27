@@ -131,6 +131,12 @@ status: current | stale | stub
 ---
 ```
 
+### Language
+All wiki content — page bodies, section headers, inline notes, log entries, and frontmatter values —
+must be written in a single consistent language. Default to **English** unless the domain `CLAUDE.md`
+specifies otherwise. The user may interact with the LLM in any language; that does not change the
+wiki's output language.
+
 ### Linking style
 Always use wiki-style links: `[[page-slug]]`. Never bare URLs inside the wiki — link to source
 summary pages instead, which then reference the original URL.
@@ -170,7 +176,7 @@ When helping the user start a new wiki, produce:
 - Directory structure
 - Page types with frontmatter templates and required sections (3–4 types max to start)
 - Operations: ingest, query, lint, any domain-specific workflows
-- Conventions: slugs, linking style, status values, tone
+- Conventions: slugs, linking style, status values, tone, wiki language
 - Behavior instructions specific to this domain
 
 **B) Setup block** — markdown the user pastes to Claude Code to scaffold the directory structure
