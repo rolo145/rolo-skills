@@ -19,6 +19,12 @@ npx skills add rolo145/rolo-skills
 
 Auto-detects all installed agents. Use `-a claude-code`, `-a codex`, etc. to target specific ones.
 
+To install a single skill, append `@skill-name`:
+
+```bash
+npx skills add rolo145/rolo-skills@llm-wiki
+```
+
 ### Claude Code (direct)
 
 ```bash
