@@ -3,14 +3,15 @@ name: runbook-wiki
 description: >
   Build and maintain a knowledge base for PROCEDURAL, experience-driven knowledge — things learned
   by doing and fixing, not by reading documents. The unit of knowledge is a solved problem or a
-  repeatable procedure (how to run, build, test, deploy, configure, or fix something), captured once
-  and reused. Use when the user wants to: set up a developer survival guide, runbook, ops or
-  troubleshooting base, or onboarding guide; file a solved problem or fix into one; query one like a
-  chatbot ("how do I run tests on Jenkins", "how do I set up the dev environment"); or check it for
-  stale procedures. Trigger phrases: "developer guide", "runbook", "how do I run/build/test/deploy",
-  "set up the environment", "recurring error", "team knowledge base". Agent-agnostic — needs an agent
-  that reads/writes files in a repo. NOT for ingesting and synthesizing source documents (articles,
-  papers, transcripts), nor a bookmark manager or one-shot research project.
+  repeatable procedure (how to run, build, deploy, configure, operate, or fix something), captured
+  once and reused. Works for any repeatable-process domain — developer/ops runbooks, sysadmin guides,
+  support/ops playbooks, onboarding guides, SOPs. Use when the user wants to set up such a guide;
+  file a solved problem or fix into one; query one like a chatbot ("how do I set up the dev
+  environment"); or check it for stale procedures.
+  Trigger phrases: "runbook", "developer/survival guide", "playbook", "SOP", "how do I
+  run/build/deploy X", "recurring error", "team knowledge base". Agent-agnostic — needs an agent that
+  reads/writes files in a repo. NOT for ingesting and synthesizing source documents, nor a bookmark
+  manager or one-shot research project.
 ---
 
 # Runbook Wiki Pattern

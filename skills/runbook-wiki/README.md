@@ -8,7 +8,7 @@ Classic team wikis go stale and you have to scroll and hunt for the right page, 
 
 ## When to use it
 
-- You want to set up a developer survival guide, runbook, ops/troubleshooting base, or onboarding guide
+- You want to set up a procedural guide for any repeatable-process domain — a runbook, ops/support playbook, sysadmin or homelab guide, developer survival guide, onboarding guide, or SOPs
 - You want to file a solved problem or a fix into an existing guide
 - You want to query the guide like a chatbot ("how do I set up the dev environment")
 - You want a freshness check to surface stale or outdated procedures
