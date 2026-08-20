@@ -17,8 +17,7 @@ my-skill/
 ├── references/       # the skill
 ├── assets/           # the skill
 ├── _artifacts/       # produced
-├── _feedback/        # produced — opt-in
-└── _memory/          # produced
+└── _feedback/        # produced — opt-in
 ```
 
 One glance separates authored content from runtime exhaust. So does one
@@ -33,15 +32,14 @@ One glance separates authored content from runtime exhaust. So does one
 | `assets/` | Templates, schemas, images | Authored | committed |
 | `_artifacts/` | Output of runs — reports, generated files | Disposable | **ignored** |
 | `_feedback/` | Friction notes for later improvement | Cumulative | **committed** (when present) |
-| `_memory/` | State carried between runs | Machine-local | **ignored** |
 
 `_feedback/` is committed on purpose. It is small, it is the skill's improvement
 history, and it must travel with the skill when shared — a skill that arrives
 without its known rough edges arrives incomplete. Not every skill needs one; the
 ones that have it should never hide it.
 
-`_artifacts/` and `_memory/` are ignored because they are per-run and
-per-machine. Committing them creates conflicts and leaks local paths.
+`_artifacts/` is ignored because it is per-run and per-machine. Committing it
+creates conflicts and leaks local paths.
 
 ## Only create what gets written
 
@@ -86,7 +84,6 @@ Every skill gets one, from `assets/gitignore.template`:
 
 ```
 _artifacts/
-_memory/
 .DS_Store
 ```
 

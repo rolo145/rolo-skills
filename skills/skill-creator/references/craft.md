@@ -70,18 +70,31 @@ examples (use a code block), or linear instructions (use a numbered list).
 - **Anything a regex could enforce** — put it in `validate.sh`, where it exits
   non-zero, instead of in prose, where it gets skipped
 
-## Testing a skill (optional, heavier)
+## Testing a skill
 
-The strongest method is adversarial: run the scenario against a fresh agent
-*without* the skill first, record the exact rationalizations it produces, then
-write the skill to counter those specific rationalizations and re-run. Wording is
-verified with 5+ samples per variant against a no-guidance control — single
-samples lie, and variance across runs is itself the signal that a rule isn't
-binding.
+Two different things fail, and only one of them is cheap to check by reading.
 
-That method needs subagent dispatch, so it is **not** part of this skill's default
-flow. `superpowers:writing-skills` has the full methodology if you want it.
+**Does it trigger?** Not answerable by re-reading — you wrote the description, so
+you read it the way you meant it, and one that never fires leaves no trace in any
+transcript. Measure it: skill-creator's **Tune** mode runs the description
+against a set of trigger queries and returns the variant that scores best on a
+held-out half. Do this for every skill; the failure mode is identical across all
+of them and invisible in all of them.
 
-At minimum, before calling a skill done: re-read the `description` cold and ask
-whether you would load this skill for the task it targets — and whether you'd
-wrongly load it for the neighbouring task the interview identified.
+**Does the body bind?** The strongest method is adversarial: run the scenario
+against a fresh agent *without* the skill, record the exact rationalizations it
+produces, then write rules that counter those specific rationalizations and
+re-run. Verify wording with 5+ samples per variant against a no-guidance control
+— single samples lie, and variance across runs is itself the signal that a rule
+isn't binding.
+
+That needs subagent dispatch and real token budget, so it is **not** part of the
+default flow. It repays the cost only where a run's output is objectively
+checkable — did it find the planted bug, does the file parse, does the field
+appear. Where the output is a judgement call, a grader is a more expensive and
+less reliable version of reading it yourself. `superpowers:writing-skills` has the
+full methodology.
+
+For everything else the honest minimum is the neighbour test: name the nearest
+task this skill is *not* for, and check that the description would not load it
+there.

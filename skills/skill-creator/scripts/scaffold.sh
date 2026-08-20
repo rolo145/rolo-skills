@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Scaffold a spec-conformant skill directory.
-# Usage: scaffold.sh <skill-name> [parent-dir] [--artifacts] [--memory] [--feedback]
+# Usage: scaffold.sh <skill-name> [parent-dir] [--artifacts] [--feedback]
 set -euo pipefail
 
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -9,24 +9,29 @@ ASSETS="$SELF_DIR/../assets"
 NAME=""
 PARENT="$HOME/.agents/skills"
 WANT_ARTIFACTS=0
-WANT_MEMORY=0
 WANT_FEEDBACK=0
 
 for arg in "$@"; do
   case "$arg" in
     --artifacts) WANT_ARTIFACTS=1 ;;
-    --memory)    WANT_MEMORY=1 ;;
     --feedback)  WANT_FEEDBACK=1 ;;
     -h|--help)
       sed -n '2,3p' "$0" | sed 's/^# \{0,1\}//'
       exit 0 ;;
+    --*)
+      # Without this, an unknown flag falls through to the positional arm and is
+      # silently used as the parent directory — which fails later, in mkdir, with
+      # an error that says nothing about the real mistake.
+      echo "ERROR: unknown option '$arg'" >&2
+      echo "       valid options: --artifacts --feedback" >&2
+      exit 2 ;;
     *)
       if [ -z "$NAME" ]; then NAME="$arg"; else PARENT="$arg"; fi ;;
   esac
 done
 
 if [ -z "$NAME" ]; then
-  echo "usage: scaffold.sh <skill-name> [parent-dir] [--artifacts] [--memory] [--feedback]" >&2
+  echo "usage: scaffold.sh <skill-name> [parent-dir] [--artifacts] [--feedback]" >&2
   exit 2
 fi
 
@@ -49,7 +54,6 @@ fi
 
 mkdir -p "$DEST"/{scripts,references,assets}
 if [ "$WANT_ARTIFACTS" -eq 1 ]; then mkdir -p "$DEST/_artifacts"; fi
-if [ "$WANT_MEMORY" -eq 1 ];    then mkdir -p "$DEST/_memory"; fi
 if [ "$WANT_FEEDBACK" -eq 1 ];  then mkdir -p "$DEST/_feedback"; fi
 
 # The Feedback section of the template is delimited by sentinels: keep its body
@@ -102,6 +106,5 @@ echo "  1. Write the description — triggering conditions only, no workflow sum
 echo "  2. Fill in SKILL.md."
 echo "  3. $SELF_DIR/validate.sh $DEST"
 if [ "$WANT_ARTIFACTS" -eq 0 ]; then echo "  (_artifacts/ not created — pass --artifacts if the skill writes output files)"; fi
-if [ "$WANT_MEMORY" -eq 0 ];    then echo "  (_memory/ not created — pass --memory if the skill carries state between runs)"; fi
 if [ "$WANT_FEEDBACK" -eq 0 ];  then echo "  (_feedback/ not created — pass --feedback if the skill should record friction for later harvest)"; fi
 exit 0

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Produce a distributable copy of a skill: validated, with runtime output stripped.
 # Usage: package.sh <skill-dir> [out-dir]
-# _artifacts/ and _memory/ are excluded. _feedback/ is kept — it is the skill's
+# _artifacts/ is excluded. _feedback/ is kept — it is the skill's
 # improvement history and should travel with it.
 set -uo pipefail
 
@@ -31,12 +31,12 @@ fi
 
 mkdir -p "$DEST"
 ( cd "$SRC" && tar -cf - \
-    --exclude='./_artifacts' --exclude='./_memory' \
+    --exclude='./_artifacts' \
     --exclude='.DS_Store' --exclude='./.git' . ) | ( cd "$DEST" && tar -xf - )
 
 echo
 echo "== packaged to $DEST"
-echo "   excluded: _artifacts/  _memory/  .git/  .DS_Store"
+echo "   excluded: _artifacts/  .git/  .DS_Store"
 if [ -d "$DEST/_feedback" ]; then
   KEPT=$(find "$DEST/_feedback" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
   echo "   kept:     _feedback/ ($KEPT file(s))"

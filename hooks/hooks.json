@@ -1,0 +1,17 @@
+{
+  "description": "rolo-skills — spec-check a SKILL.md right after it is written or edited",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/validate-skill-md.sh\"",
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  }
+}

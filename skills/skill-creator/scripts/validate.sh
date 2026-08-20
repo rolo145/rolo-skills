@@ -1,18 +1,31 @@
 #!/usr/bin/env bash
 # Validate a skill against the agentskills.io specification and the
 # underscore-prefix layout convention.
-# Usage: validate.sh <path-to-skill-dir>
+# Usage: validate.sh <path-to-skill-dir> [--errors-only]
 # Exit: 0 = no errors (warnings allowed), 1 = at least one ERROR, 2 = bad usage.
+#
+# --errors-only prints nothing unless something is actually broken, so the script
+# can run unattended — from an editor hook, say — without adding noise to a clean
+# file.
 
 set -uo pipefail
 
-DIR="${1:-}"
+QUIET=0
+ARGS=()
+for a in "$@"; do
+  case "$a" in
+    --errors-only|-q) QUIET=1 ;;
+    *) ARGS+=("$a") ;;
+  esac
+done
+
+DIR="${ARGS[0]:-}"
 if [ -z "$DIR" ]; then
-  echo "usage: validate.sh <path-to-skill-dir>" >&2
+  echo "usage: validate.sh <path-to-skill-dir> [--errors-only]" >&2
   exit 2
 fi
 if [ ! -d "$DIR" ]; then
-  echo "usage: validate.sh <path-to-skill-dir>  ('$DIR' is not a directory)" >&2
+  echo "usage: validate.sh <path-to-skill-dir> [--errors-only]  ('$DIR' is not a directory)" >&2
   exit 2
 fi
 # Resolve so that '.', '..' and trailing slashes still yield a real directory
@@ -26,11 +39,11 @@ ERRORS=0
 WARNINGS=0
 
 err()  { echo "ERROR   $*"; ERRORS=$((ERRORS+1)); }
-warn() { echo "WARN    $*"; WARNINGS=$((WARNINGS+1)); }
-ok()   { echo "ok      $*"; }
-note() { echo "note    $*"; }
+warn() { [ "$QUIET" -eq 1 ] || echo "WARN    $*"; WARNINGS=$((WARNINGS+1)); }
+ok()   { [ "$QUIET" -eq 1 ] || echo "ok      $*"; }
+note() { [ "$QUIET" -eq 1 ] || echo "note    $*"; }
 
-echo "Validating $DIR"
+[ "$QUIET" -eq 1 ] || echo "Validating $DIR"
 echo
 
 # ---------------------------------------------------------------- SKILL.md
@@ -141,6 +154,21 @@ else
   ok "SKILL.md is $LINES lines"
 fi
 
+# ------------------------------------------------------- context economy
+# The body is billed on every activation, so what matters is not its absolute
+# size but whether a typical run needs all of it. A large body with nothing
+# underneath it means detail was never pushed down.
+if [ "$LINES" -gt 300 ] && [ ! -d "$DIR/references" ]; then
+  warn "SKILL.md is $LINES lines with no references/ — every run pays for all of it; move mode-specific detail into references/"
+fi
+for f in "$DIR"/references/*.md; do
+  [ -f "$f" ] || continue
+  RL=$(wc -l < "$f" | tr -d ' ')
+  if [ "$RL" -gt 500 ]; then
+    warn "references/$(basename "$f") is $RL lines — split it, or a run needing one section pays for all of them"
+  fi
+done
+
 # --------------------------------------------------------- file references
 MDREFS="$(grep -oE '\]\([^)#][^)]*\)' "$SKILL" 2>/dev/null | sed 's/^](//; s/)$//' || true)"
 # Also catch paths mentioned in backticks, e.g. `references/spec.md` or `scripts/run.sh`.
@@ -197,9 +225,9 @@ else
 fi
 
 if [ ! -f "$DIR/.gitignore" ]; then
-  warn "no .gitignore — _artifacts/ and _memory/ should not be committed"
+  warn "no .gitignore — _artifacts/ should not be committed"
 else
-  for pat in _artifacts/ _memory/; do
+  for pat in _artifacts/; do
     if ! grep -qF "$pat" "$DIR/.gitignore"; then
       warn ".gitignore does not cover '$pat'"
     fi
@@ -209,7 +237,7 @@ else
   fi
 fi
 
-for d in _artifacts _memory; do
+for d in _artifacts; do
   if [ -d "$DIR/$d" ] && [ -z "$(ls -A "$DIR/$d" 2>/dev/null)" ]; then
     warn "$d/ exists but is empty — create it only when the skill actually writes there"
   fi
@@ -226,7 +254,9 @@ if command -v skills-ref >/dev/null 2>&1; then
   fi
 fi
 
-echo
-echo "$ERRORS error(s), $WARNINGS warning(s)"
+if [ "$QUIET" -eq 0 ] || [ "$ERRORS" -gt 0 ]; then
+  echo
+  echo "$ERRORS error(s), $WARNINGS warning(s)"
+fi
 [ "$ERRORS" -gt 0 ] && exit 1
 exit 0
