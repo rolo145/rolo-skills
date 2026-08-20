@@ -1,0 +1,48 @@
+---
+name: SKILL_NAME
+description: Use when [triggering conditions the user would recognise], [concrete symptoms], or when the user mentions [keywords they would actually type]. Describe WHEN, not the internal procedure.
+---
+
+# SKILL_NAME
+
+One or two sentences: what this is and the core principle behind it.
+
+## When to use
+
+- [Symptom or situation that means this applies]
+- [Another one]
+
+Do NOT use for [the nearest neighbouring task this is not].
+
+## Quick reference
+
+| Situation | Do |
+|---|---|
+| … | … |
+
+## Procedure
+
+1. …
+2. …
+3. …
+
+## Common mistakes
+
+| Mistake | Fix |
+|---|---|
+| … | … |
+
+## Red flags — stop
+
+- [Thing you might be about to do that means you are off track]
+
+<!-- Match each rule above to its failure type: a skipped-rule failure takes a
+     prohibition + red flag; a wrong-shaped-output failure takes a positive
+     recipe stating what the output IS. See skill-creator references/craft.md. -->
+
+## Feedback
+
+On friction — a user correction, a failed step, an ambiguity in this skill, or a
+guess you had to make — write an entry into `_feedback/` using
+`assets/feedback-entry.template.md`. A clean run writes nothing; see the
+_feedback/README.md in this directory for the format and the harvest procedure.

@@ -1,0 +1,8 @@
+# Runtime output — regenerated per run, never committed.
+_artifacts/
+_memory/
+
+# _feedback/ is deliberately NOT ignored: it is the skill's improvement
+# history and should travel with the skill when shared.
+
+.DS_Store

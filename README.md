@@ -9,6 +9,7 @@ AI coding assistant skills for Claude Code, Codex CLI, and GitHub Copilot.
 | [dep-guard-update](skills/dep-guard-update/SKILL.md) | npm dependency updates via dep-guard CLI |
 | [llm-wiki](skills/llm-wiki/SKILL.md) | Build and maintain a persistent personal knowledge base with an LLM |
 | [runbook-wiki](skills/runbook-wiki/SKILL.md) | Build and maintain a procedural runbook / developer survival guide |
+| [skill-creator](skills/skill-creator/SKILL.md) | Create, validate, improve, and package agent skills to the agentskills.io spec |
 
 ## Installation
 
@@ -24,6 +25,7 @@ To install a single skill, append `@skill-name`:
 
 ```bash
 npx skills add rolo145/rolo-skills@llm-wiki
+npx skills add rolo145/rolo-skills@skill-creator
 ```
 
 ### Claude Code (direct)
