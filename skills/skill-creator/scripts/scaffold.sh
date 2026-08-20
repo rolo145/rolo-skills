@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Scaffold a spec-conformant skill directory.
-# Usage: scaffold.sh <skill-name> [parent-dir] [--artifacts] [--memory]
+# Usage: scaffold.sh <skill-name> [parent-dir] [--artifacts] [--memory] [--feedback]
 set -euo pipefail
 
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,13 +10,15 @@ NAME=""
 PARENT="$HOME/.agents/skills"
 WANT_ARTIFACTS=0
 WANT_MEMORY=0
+WANT_FEEDBACK=0
 
 for arg in "$@"; do
   case "$arg" in
     --artifacts) WANT_ARTIFACTS=1 ;;
     --memory)    WANT_MEMORY=1 ;;
+    --feedback)  WANT_FEEDBACK=1 ;;
     -h|--help)
-      sed -n '2,4p' "$0" | sed 's/^# \{0,1\}//'
+      sed -n '2,3p' "$0" | sed 's/^# \{0,1\}//'
       exit 0 ;;
     *)
       if [ -z "$NAME" ]; then NAME="$arg"; else PARENT="$arg"; fi ;;
@@ -24,7 +26,7 @@ for arg in "$@"; do
 done
 
 if [ -z "$NAME" ]; then
-  echo "usage: scaffold.sh <skill-name> [parent-dir] [--artifacts] [--memory]" >&2
+  echo "usage: scaffold.sh <skill-name> [parent-dir] [--artifacts] [--memory] [--feedback]" >&2
   exit 2
 fi
 
@@ -45,14 +47,25 @@ if [ -e "$DEST" ]; then
   exit 1
 fi
 
-mkdir -p "$DEST"/{scripts,references,assets,_feedback}
+mkdir -p "$DEST"/{scripts,references,assets}
 if [ "$WANT_ARTIFACTS" -eq 1 ]; then mkdir -p "$DEST/_artifacts"; fi
-if [ "$WANT_MEMORY" -eq 1 ]; then mkdir -p "$DEST/_memory"; fi
+if [ "$WANT_MEMORY" -eq 1 ];    then mkdir -p "$DEST/_memory"; fi
+if [ "$WANT_FEEDBACK" -eq 1 ];  then mkdir -p "$DEST/_feedback"; fi
 
-sed "s/SKILL_NAME/$NAME/g" "$ASSETS/SKILL.md.template" > "$DEST/SKILL.md"
+# The Feedback section of the template is delimited by sentinels: keep its body
+# only when the skill has a _feedback/ to write into. The sentinels never ship.
+sed "s/SKILL_NAME/$NAME/g" "$ASSETS/SKILL.md.template" \
+  | awk -v keep="$WANT_FEEDBACK" '
+      $0 == "<!-- FEEDBACK:START -->" { inblock=1; next }
+      $0 == "<!-- FEEDBACK:END -->"   { inblock=0; next }
+      inblock && keep == 0            { next }
+      { print }
+    ' > "$DEST/SKILL.md"
+
 cp "$ASSETS/gitignore.template" "$DEST/.gitignore"
-cp "$ASSETS/feedback-entry.template.md" "$DEST/assets/feedback-entry.template.md"
 
+if [ "$WANT_FEEDBACK" -eq 1 ]; then
+cp "$ASSETS/feedback-entry.template.md" "$DEST/assets/feedback-entry.template.md"
 cat > "$DEST/_feedback/README.md" <<READMEEOF
 # _feedback
 
@@ -79,6 +92,7 @@ Underscore prefix means runtime output, not part of the skill. This directory is
 the exception that stays committed — it is the skill's improvement history and
 should travel with it.
 READMEEOF
+fi
 
 echo "Created $DEST"
 find "$DEST" -mindepth 1 | sed "s|$DEST|  .|" | sort
@@ -88,5 +102,6 @@ echo "  1. Write the description — triggering conditions only, no workflow sum
 echo "  2. Fill in SKILL.md."
 echo "  3. $SELF_DIR/validate.sh $DEST"
 if [ "$WANT_ARTIFACTS" -eq 0 ]; then echo "  (_artifacts/ not created — pass --artifacts if the skill writes output files)"; fi
-if [ "$WANT_MEMORY" -eq 0 ]; then echo "  (_memory/ not created — pass --memory if the skill carries state between runs)"; fi
+if [ "$WANT_MEMORY" -eq 0 ];    then echo "  (_memory/ not created — pass --memory if the skill carries state between runs)"; fi
+if [ "$WANT_FEEDBACK" -eq 0 ];  then echo "  (_feedback/ not created — pass --feedback if the skill should record friction for later harvest)"; fi
 exit 0

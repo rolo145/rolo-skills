@@ -17,7 +17,7 @@ my-skill/
 ├── references/       # the skill
 ├── assets/           # the skill
 ├── _artifacts/       # produced
-├── _feedback/        # produced
+├── _feedback/        # produced — opt-in
 └── _memory/          # produced
 ```
 
@@ -32,12 +32,13 @@ One glance separates authored content from runtime exhaust. So does one
 | `references/` | Docs loaded on demand | Authored | committed |
 | `assets/` | Templates, schemas, images | Authored | committed |
 | `_artifacts/` | Output of runs — reports, generated files | Disposable | **ignored** |
-| `_feedback/` | Friction notes for later improvement | Cumulative | **committed** |
+| `_feedback/` | Friction notes for later improvement | Cumulative | **committed** (when present) |
 | `_memory/` | State carried between runs | Machine-local | **ignored** |
 
 `_feedback/` is committed on purpose. It is small, it is the skill's improvement
 history, and it must travel with the skill when shared — a skill that arrives
-without its known rough edges arrives incomplete.
+without its known rough edges arrives incomplete. Not every skill needs one; the
+ones that have it should never hide it.
 
 `_artifacts/` and `_memory/` are ignored because they are per-run and
 per-machine. Committing them creates conflicts and leaks local paths.
@@ -48,9 +49,15 @@ An empty `_artifacts/` in a skill that produces no files is noise pretending to
 be convention. Create an underscore directory only when the skill has a
 mechanism that writes to it.
 
-`_feedback/` is the exception: create it always, because every skill can hit
-friction. Seed it with a `README.md` so the directory survives git and documents
-itself.
+This holds for `_feedback/` too — it is opt-in, not automatic. A skill you will
+iterate on earns one; a small or one-off skill does not, and an empty
+`_feedback/` teaches the same wrong lesson an empty `_artifacts/` does. Decide
+during the interview, then pass `scaffold.sh --feedback` when the answer is yes.
+
+When you do create it, seed it with a `README.md` so the directory survives git
+and documents itself, and keep the matching Feedback section in `SKILL.md`. The
+two travel together: a `SKILL.md` that tells its agent to write entries into a
+directory the skill does not have is the one case `validate.sh` still flags.
 
 ## Where content goes
 
@@ -83,4 +90,5 @@ _memory/
 .DS_Store
 ```
 
-`_feedback/` is deliberately absent from that list.
+`_feedback/` is deliberately absent from that list — a skill that has one
+commits it.

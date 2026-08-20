@@ -37,8 +37,10 @@ mkdir -p "$DEST"
 echo
 echo "== packaged to $DEST"
 echo "   excluded: _artifacts/  _memory/  .git/  .DS_Store"
-KEPT=$(find "$DEST/_feedback" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
-echo "   kept:     _feedback/ ($KEPT file(s))"
+if [ -d "$DEST/_feedback" ]; then
+  KEPT=$(find "$DEST/_feedback" -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+  echo "   kept:     _feedback/ ($KEPT file(s))"
+fi
 
 echo
 echo "== manual review before you share this"

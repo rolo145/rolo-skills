@@ -28,6 +28,7 @@ WARNINGS=0
 err()  { echo "ERROR   $*"; ERRORS=$((ERRORS+1)); }
 warn() { echo "WARN    $*"; WARNINGS=$((WARNINGS+1)); }
 ok()   { echo "ok      $*"; }
+note() { echo "note    $*"; }
 
 echo "Validating $DIR"
 echo
@@ -174,7 +175,13 @@ for d in "$DIR"/*/; do
 done
 
 if [ ! -d "$DIR/_feedback" ]; then
-  warn "no _feedback/ directory — friction from runs has nowhere to go"
+  # Opting out is legitimate. What is not legitimate is a SKILL.md that tells
+  # its agent to write entries into a directory the skill does not have.
+  if grep -q '_feedback/' "$SKILL"; then
+    warn "SKILL.md references _feedback/ but the directory does not exist — create it (scaffold.sh --feedback) or drop the instruction"
+  else
+    note "no _feedback/ — this skill does not record friction (opt in with scaffold.sh --feedback)"
+  fi
 else
   OPEN=0
   for f in "$DIR"/_feedback/*.md; do
@@ -197,7 +204,7 @@ else
       warn ".gitignore does not cover '$pat'"
     fi
   done
-  if grep -qE '^_feedback/' "$DIR/.gitignore"; then
+  if [ -d "$DIR/_feedback" ] && grep -qE '^_feedback/' "$DIR/.gitignore"; then
     warn ".gitignore excludes _feedback/ — it should be committed so a shared skill carries its improvement history"
   fi
 fi

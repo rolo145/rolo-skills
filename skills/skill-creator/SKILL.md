@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires bash and awk, plus a writable skills directory. Optionally uses the skills-ref CLI when installed.
 metadata:
   author: rolandbotka
-  version: "1.0"
+  version: "1.1"
   spec: https://agentskills.io/specification
 ---
 
@@ -40,16 +40,19 @@ my-skill/
 ├── scripts/          # executable code the skill runs
 ├── references/       # docs loaded on demand
 ├── assets/           # templates, schemas, images
-├── _artifacts/       # OUTPUT of runs — gitignored
-├── _feedback/        # friction notes — COMMITTED
-└── _memory/          # state carried between runs — gitignored
+├── _artifacts/       # opt-in — OUTPUT of runs, gitignored
+├── _feedback/        # opt-in — friction notes, COMMITTED
+└── _memory/          # opt-in — state carried between runs, gitignored
 ```
 
 Unprefixed = the skill. Underscore-prefixed = what it produced.
 A reader, a `.gitignore`, and a packaging script can all tell them apart with one rule.
 
-Never create an underscore directory the skill has no mechanism to write to.
-Empty `_artifacts/` in a skill that produces nothing is noise, not convention.
+**All three underscore directories are opt-in.** Never create one the skill has no
+mechanism to write to — an empty `_artifacts/` in a skill that produces nothing is
+noise, not convention, and the same is true of `_feedback/` in a skill nobody will
+iterate on. `scaffold.sh` creates each only when asked: `--artifacts`, `--memory`,
+`--feedback`.
 
 ---
 
@@ -62,7 +65,9 @@ the skill works, and the rule for skipping the ones already answered.
 
 Then:
 
-1. Run `scripts/scaffold.sh <skill-name> [parent-dir]` to build the tree.
+1. Run `scripts/scaffold.sh <skill-name> [parent-dir]` to build the tree, adding
+   `--artifacts`, `--memory`, or `--feedback` for the underscore directories the
+   interview established this skill needs.
 2. Read `references/craft.md` and write `SKILL.md` from `assets/SKILL.md.template`.
 3. Run `scripts/validate.sh <path>` and fix every violation before reporting done.
 
@@ -128,7 +133,9 @@ When the complaint is "it never triggers", the bug is almost always the
 
 ## Mode 3: Harvest
 
-This is what makes `_feedback/` worth having. Without it the folder is a graveyard.
+Applies to skills that have a `_feedback/`. This is what makes the folder worth
+having — without harvesting it is a graveyard, which is why it is opt-in rather
+than scaffolded by default.
 
 1. Read every `_feedback/*.md` with `status: open`.
 2. Group by `trigger` — repeated triggers of the same kind point at one missing rule,
@@ -165,6 +172,11 @@ decide: read every hit before sharing.
 
 ## Writing feedback entries
 
+**Only for skills that have a `_feedback/`.** If the running skill has no such
+directory, it opted out: there is nothing to write and nothing to create. Do not
+add the folder mid-run to hold an entry — raise the friction with the user
+instead, and let them decide whether the skill should start recording.
+
 **Write an entry only on friction.** A clean run writes nothing — the absence of
 a file is the signal that it went fine. Every-run logging buries the useful
 entries and nobody reads the folder twice.
@@ -185,9 +197,9 @@ The `## What the skill should have said instead` section is required and must
 contain proposed wording. An entry without it is a complaint; an entry with it
 is a patch waiting to be applied.
 
-**This applies to skill-creator itself.** If the user corrects your interview
-assumptions or your draft description, write the entry into this skill's own
-`_feedback/` directory.
+**This applies to skill-creator itself**, which does keep a `_feedback/`. If the
+user corrects your interview assumptions or your draft description, write the
+entry there — regardless of whether the skill you were creating opted in.
 
 ---
 
@@ -195,10 +207,13 @@ assumptions or your draft description, write the entry into this skill's own
 
 - About to report a skill as done without running `validate.sh`
 - Writing a `description` that describes the procedure rather than the trigger
-- Creating `_artifacts/` or `_memory/` when nothing writes to them
+- Creating `_artifacts/`, `_memory/`, or `_feedback/` when nothing writes to them
+- Scaffolding `_feedback/` without the user having asked for it in the interview
+- Leaving a Feedback section in a `SKILL.md` whose skill has no `_feedback/`
 - Writing a rule into prose that a regex in `validate.sh` could enforce
 - Skipping the interview because the request "seems clear" — it answers at most two of the six questions
 - Writing a feedback entry for a run that went fine
+- Creating a `_feedback/` directory mid-run just to have somewhere to file an entry
 - Harvesting feedback into "improve clarity" instead of a specific edit
 - Marking entries resolved without making the edit
 
@@ -216,6 +231,6 @@ assumptions or your draft description, write the entry into this skill's own
 
 | Script | Does |
 |---|---|
-| `scripts/scaffold.sh <name> [parent] [--artifacts] [--memory]` | Builds a spec-conformant tree. Validates the name, refuses to overwrite, creates `_artifacts/`/`_memory/` only when asked. |
+| `scripts/scaffold.sh <name> [parent] [--artifacts] [--memory] [--feedback]` | Builds a spec-conformant tree. Validates the name, refuses to overwrite, creates underscore directories only when asked. `--feedback` also seeds `_feedback/README.md`, copies the entry template, and keeps the Feedback section in the generated `SKILL.md`. |
 | `scripts/validate.sh <path>` | Spec + convention checks. Exit 1 on any ERROR. |
 | `scripts/package.sh <path> [out]` | Validates, strips runtime output, scans for leaked paths and secrets. |

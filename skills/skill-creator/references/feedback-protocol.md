@@ -3,6 +3,11 @@
 `_feedback/` records where a skill hurt, so it can be improved later from evidence
 rather than memory.
 
+**The directory is opt-in.** A skill has one only if it was scaffolded with
+`--feedback`, and everything below applies only to skills that have it. If the
+running skill has no `_feedback/`, there is nothing to write — surface the
+friction to the user instead of creating the folder to hold it.
+
 ## Write only on friction
 
 A clean run writes **nothing**. The absence of a file is the signal that the run

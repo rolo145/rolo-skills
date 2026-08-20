@@ -10,7 +10,7 @@ to trigger correctly, and a body scoped tightly enough to be worth loading.
 |---|---|---|
 | 1 | When should this fire? What would the user actually type? | The "when" half of `description` |
 | 2 | When should it *not* fire? What is the nearest thing this isn't? | Boundaries — stops over-triggering |
-| 3 | What does a successful run produce? | Body structure; whether `_artifacts/` is needed |
+| 3 | What does a successful run produce? | Body structure; which underscore directories are needed |
 | 4 | Fixed procedure, or judgment guidance? | `scripts/` vs `references/` split |
 | 5 | What tools, CLIs, or access must exist? | `compatibility`, `allowed-tools` |
 | 6 | What goes wrong when a human does this task today? | Red-flags table; seeds the feedback triggers |
@@ -39,20 +39,43 @@ carelessly by the fourth.
 
 1. A one-paragraph brief of what the skill will do
 2. The **draft `description` verbatim**
-3. The directory layout you intend to create
+3. The directory layout you intend to create — including the answer to the
+   layout question below
 
 Then stop for a yes or no. The description is the cheapest field to get wrong and
 the most expensive to notice later: it fails *silently*, by the skill simply
 never loading, and nothing in any transcript tells you it happened.
 
+## The layout question
+
+Ask this once, as part of the layout you confirm — never assume it:
+
+> Should this skill record friction it hits, so it can be improved from evidence
+> later? (adds `_feedback/`)
+
+**Default no.** Recommend yes when the skill is one the user expects to iterate
+on — a workflow they run often, or one whose rules are still being discovered.
+Recommend no for a small, stable, or one-off skill: an empty `_feedback/` is the
+same noise as an empty `_artifacts/`, and it makes the folder mean nothing when a
+skill that does need one finally gets it.
+
+The answer picks the flag: `scaffold.sh <name> --feedback`, or plain
+`scaffold.sh <name>`. Nothing else about the interview changes.
+
+Questions 3 and 6 usually answer this before you ask. Q3 already established what
+a run produces; Q6 — what goes wrong when a human does this today — tells you
+whether the failure modes are known or still being learned. Known and stable
+means no folder.
+
 ## When the user corrects you
 
-A correction at the confirmation step means the interview missed something. Write
-a `_feedback/` entry against skill-creator itself with `trigger: user-correction`,
-recording which of the six questions should have caught it.
+A correction at the confirmation step means the interview missed something.
+skill-creator keeps its own `_feedback/`: write an entry there with
+`trigger: user-correction`, recording which of the six questions should have
+caught it.
 
-That is the loop closing on its own tail: this skill installs the feedback
-protocol into every skill it creates, and is subject to it too.
+That is the loop closing on its own tail. This skill is subject to the protocol
+it documents — whether or not the skill being created opts into it.
 
 ## Anti-patterns
 

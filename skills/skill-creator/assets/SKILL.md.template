@@ -39,6 +39,7 @@ Do NOT use for [the nearest neighbouring task this is not].
 <!-- Match each rule above to its failure type: a skipped-rule failure takes a
      prohibition + red flag; a wrong-shaped-output failure takes a positive
      recipe stating what the output IS. See skill-creator references/craft.md. -->
+<!-- FEEDBACK:START -->
 
 ## Feedback
 
@@ -46,3 +47,4 @@ On friction — a user correction, a failed step, an ambiguity in this skill, or
 guess you had to make — write an entry into `_feedback/` using
 `assets/feedback-entry.template.md`. A clean run writes nothing; see the
 _feedback/README.md in this directory for the format and the harvest procedure.
+<!-- FEEDBACK:END -->
