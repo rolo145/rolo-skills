@@ -83,9 +83,14 @@ skill.
    the check to move into `validate.sh`. Never "clarify the documentation".
 4. Prefer moving a rule into a script over writing it in prose. A rule that exits
    non-zero cannot be skipped; a rule in prose can.
-5. Apply approved edits.
-6. Set `status: resolved` and fill `resolved-by` on the entries the edit addressed.
-7. Re-run `validate.sh`.
+5. **Weigh where it lands.** An entry proposes a location as well as wording, and the
+   location is not evidence — it was chosen mid-run by an agent that wanted the rule
+   where it would have helped *it*. Detail one path uses goes to `references/`; a rule a
+   script can enforce goes to the script. See `economy.md` — the body is paid on every
+   activation, and six harvests of accepted placements is how it doubles.
+6. Apply approved edits.
+7. Set `status: resolved` and fill `resolved-by` on the entries the edit addressed.
+8. Re-run `validate.sh`, and compare the body's line count with its pre-harvest value.
 
 Do not mark entries resolved without making the edit, and do not leave a decided
 entry open. An open entry must mean an unfixed defect, or the queue stops meaning

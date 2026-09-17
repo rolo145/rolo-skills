@@ -24,7 +24,7 @@ the skill (`SKILL.md`, `scripts/`, `references/`, `assets/`) and its exhaust
 | "make a skill for X", "I need a skill that…" | **Create** | `references/interview.md`, then `references/craft.md` + `references/economy.md` |
 | "check this skill", "is this valid" | **Validate** | nothing — run the script |
 | "why doesn't it trigger", "it fires on the wrong things" | **Tune** | nothing — run the script |
-| "improve this skill", "what went wrong with it", "read the feedback" | **Harvest** | `references/feedback-protocol.md` |
+| "improve this skill", "what went wrong with it", "read the feedback" | **Harvest** | `references/feedback-protocol.md` + `references/economy.md` |
 | "share this skill", "publish it", "get it ready to distribute" | **Package** | nothing — run the script |
 
 Add `references/spec.md` before writing or checking any frontmatter, and
@@ -194,9 +194,17 @@ than scaffolded by default.
    not several.
 3. For each group, propose a **specific edit** to the skill: the sentence to add,
    the table row, the check to move into `validate.sh`. Not "clarify the docs".
-4. Apply the edits the user approves.
-5. Set `status: resolved` and fill `resolved-by` on the entries that edit addressed.
-6. Re-run `validate.sh`.
+4. **Re-decide where each edit goes.** An entry proposes wording *and* a location
+   ("add to step 2, after the Artifacts paragraph") — only the wording is evidence. The
+   location is your call, against `references/economy.md`: detail only one path needs
+   belongs in `references/`, and a rule a script could enforce belongs in the script with
+   one line in the body pointing at it. An entry written mid-run optimises for being
+   found; a body optimises for what every run pays. Pasting entries where they ask to go
+   is how a body doubles over six harvests without anyone making a mistake.
+5. Apply the edits the user approves.
+6. Set `status: resolved` and fill `resolved-by` on the entries that edit addressed.
+7. Re-run `validate.sh`, and compare `wc -l SKILL.md` with its pre-harvest value. A
+   harvest that only ever added lines skipped step 4.
 
 Entries whose fix is "the user changed their mind" get `status: wontfix`. Do not
 leave them open — an open entry must mean an unfixed defect, or the queue stops
@@ -270,6 +278,7 @@ entry there — regardless of whether the skill you were creating opted in.
 - Writing a feedback entry for a run that went fine
 - Creating a `_feedback/` directory mid-run just to have somewhere to file an entry
 - Harvesting feedback into "improve clarity" instead of a specific edit
+- Applying an entry's wording at the location the entry proposed, without weighing it against `economy.md`
 - Marking entries resolved without making the edit
 
 ## Reference files
