@@ -3,9 +3,9 @@ name: show-me
 description: Use ONLY when the user runs /show-me or explicitly asks to be shown
   something rather than told — "show me", "draw it", "diagram this", "sketch the
   flow", "visualize this", "what does the structure look like". Answers with
-  pseudocode, a call tree, a component tree, a file tree, Mermaid, a diff, or one
-  focused HTML page instead of prose. Not for designing real UI (frontend-design),
-  not for charting data (dataviz). Never volunteer it.
+  pseudocode, a call tree, a component tree, a file tree, an ASCII sequence
+  figure, a diff, or one focused HTML page instead of prose. Not for designing
+  real UI (frontend-design), not for charting data (dataviz). Never volunteer it.
 ---
 
 # show-me
@@ -29,6 +29,22 @@ paragraph underneath, no "let me know if you want more detail".
 Use one form. Two when the question genuinely has two halves — a structure and a
 flow through it. Never the whole catalogue.
 
+## Where the answer lands
+
+**In a terminal harness — Claude Code CLI, or anything rendering to a TTY — Mermaid
+and HTML never render.** Your reply is markdown text: a mermaid fence arrives as
+source code, an HTML file as a path. Assume a terminal unless something says otherwise.
+
+- **Default to a text form.** Pseudocode, call tree, component tree, file tree, diff,
+  or a hand-drawn ASCII/Unicode figure — all render everywhere, instantly, inside the
+  reply. Where you would have reached for Mermaid, draw the boxes and arrows in ASCII.
+- **When the picture must actually be rendered** — a graph too tangled for ASCII, a
+  layout, something the user wants to keep — write one HTML file and **open it
+  yourself** (see *When text can't carry it*). Mermaid renders fine there.
+
+Never hand the user a command so they can look at their own diagram. Opening it is
+your job.
+
 ## Pick the form
 
 | The question is about | Form |
@@ -37,10 +53,13 @@ flow through it. Never the whole catalogue.
 | what calls what at runtime | call tree |
 | UI structure, state, module boundaries | component tree |
 | where responsibility lives, a broad refactor | file tree |
-| interaction between components, over time | Mermaid |
+| interaction between components, over time | ASCII sequence figure |
 | what **changes** in a shape that already exists | `diff` of any form above |
 | a target shape the user will copy | full code block |
-| layout, visual comparison, something too dense for text | one HTML page |
+| layout, visual comparison, something too dense for text | one HTML page, which you open |
+
+No row says Mermaid. Mermaid is not a form you answer in — it is what you write
+*inside* an HTML page you open yourself. See **Where the answer lands**.
 
 ## The forms
 
@@ -82,17 +101,28 @@ src/
 └── transport/      # sends API requests
 ```
 
-**Mermaid** — interaction across components, or data flow over time:
+**ASCII sequence** — interaction across components, or data flow over time. This is
+the terminal's Mermaid; draw the lanes yourself:
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant UI
-    participant Daemon
-    User->>UI: choose command
-    UI->>Daemon: send expanded prompt
-    Daemon-->>UI: stream result
+```text
+User          UI              Daemon
+ │ choose cmd  │                │
+ ├────────────▶│ expanded prompt│
+ │             ├───────────────▶│
+ │             │◀───────────────┤ stream result
+ │◀────────────┤                │
 ```
+
+Branches become an indented block under the step that forks:
+
+```text
+ │             ├───────────────▶│ validate(token)
+ │             │◀───────────────┤ invalid  ──▶ 302 /login
+ │             │◀───────────────┤ valid    ──▶ session lookup
+```
+
+The same picture in Mermaid belongs in an HTML page you open (see *When text can't
+carry it*) — never as a mermaid fence in a terminal reply.
 
 ## Diff, or the whole block
 
@@ -134,17 +164,24 @@ function expandSkill(command: string): string {
 
 ## When text can't carry it
 
-For a visual UI, a layout, a state comparison, or a concept too dense for Mermaid,
-write **one** HTML file into the session scratchpad and open it:
+For a visual UI, a layout, a state comparison, or a graph too tangled for ASCII,
+write **one** HTML file and open it yourself:
 
 ```
-Bash(open <scratchpad>/show-me-<topic>.html)
+Bash(open <dir>/<topic>.html)
 ```
 
-The page uses the product's own colors, type, spacing and components, real labels
-and real data from the code at hand — never lorem, never placeholder boxes — and
-works at desktop and phone width. A diagram, an infographic, or a short slide
-deck, whichever fits the point; one of those, not all three.
+Put it where the repo will not track it — `docs/_diagrams/` when `docs/` is gitignored
+(`git check-ignore -q docs`), otherwise the session scratchpad.
+
+Mermaid renders here: load it from a CDN and the browser draws it. The page uses the
+product's own colors, type, spacing and components, real labels and real data from the
+code at hand — never lorem, never placeholder boxes — and works at desktop and phone
+width. A diagram, an infographic, or a short slide deck, whichever fits the point; one
+of those, not all three.
+
+Still put a short ASCII version in the reply and name the path, so the answer stands on
+its own without the browser.
 
 This is the last resort, reached when a text form would lose the point — not the
 default finish.
@@ -163,5 +200,7 @@ extra node makes the one that matters harder to find.
 - Producing three forms of the same thing so the user can choose
 - A file tree or call tree that lists everything rather than the path in question
 - Inventing plausible-looking names instead of reading the actual code first
-- Writing an HTML page when a Mermaid diagram would have said it
+- Writing an HTML page when an ASCII figure would have said it
+- Emitting a mermaid fence into a terminal reply
+- Telling the user to run a command to view their own diagram
 - Adding a closing summary that repeats what the diagram already showed

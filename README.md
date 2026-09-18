@@ -9,7 +9,7 @@ AI coding assistant skills for Claude Code, Codex CLI, and GitHub Copilot.
 | [dep-guard-update](skills/dep-guard-update/SKILL.md) | npm dependency updates via dep-guard CLI |
 | [llm-wiki](skills/llm-wiki/SKILL.md) | Build and maintain a persistent personal knowledge base with an LLM |
 | [runbook-wiki](skills/runbook-wiki/SKILL.md) | Build and maintain a procedural runbook / developer survival guide |
-| [show-me](skills/show-me/SKILL.md) | Answer a question about code with a picture of it — call tree, component tree, diff, Mermaid — instead of a paragraph |
+| [show-me](skills/show-me/SKILL.md) | Answer a question about code with a picture of it — call tree, component tree, diff, ASCII sequence — instead of a paragraph |
 | [skill-creator](skills/skill-creator/SKILL.md) | Create, validate, improve, and package agent skills to the agentskills.io spec |
 
 ## Installation
