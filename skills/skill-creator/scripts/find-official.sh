@@ -2,10 +2,16 @@
 # Locate Anthropic's official skill-creator inside the installed plugin cache and
 # print its directory.
 #
-# Only that plugin's description optimiser is delegated to. It is a stdlib-only
-# Python tool set, so it runs whether or not the skill itself is enabled in
-# /plugin — only the files need to be on disk. The cache path contains a version
-# hash, so it is resolved at call time rather than hardcoded.
+# Two things are delegated to that plugin: the description optimiser (Tune) and
+# the eval harness (Evaluate). Both are stdlib-only Python, so they run whether
+# or not the skill itself is enabled in /plugin — only the files need to be on
+# disk, and leaving it disabled keeps its description from competing with this
+# skill's for the trigger. The cache path contains a version hash, so it is
+# resolved at call time rather than hardcoded.
+#
+# The plugin cache is the source of truth on purpose. A second copy of the same
+# upstream may exist under skills/synced/ from claude.ai account sync; it lags
+# the plugin and disappears when the account skill is turned off.
 #
 # Usage: find-official.sh   -> prints the directory, or exits 1 with guidance.
 set -uo pipefail
@@ -23,9 +29,9 @@ if [ -z "$BEST" ]; then
   cat >&2 <<'MSG'
 ERROR: Anthropic's official skill-creator plugin is not installed.
 
-  Its description optimiser is the only thing this skill delegates to. Install
-  the plugin with /plugin; the skill itself can stay disabled, since nothing here
-  loads it — only its files are read from disk.
+  Its description optimiser (Tune) and eval harness (Evaluate) are what this
+  skill delegates to. Install the plugin with /plugin; leave the skill itself
+  disabled, since nothing here loads it — only its files are read from disk.
 MSG
   exit 1
 fi

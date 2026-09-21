@@ -24,6 +24,7 @@ the skill (`SKILL.md`, `scripts/`, `references/`, `assets/`) and its exhaust
 | "make a skill for X", "I need a skill that…" | **Create** | `references/interview.md`, then `references/craft.md` + `references/economy.md` |
 | "check this skill", "is this valid" | **Validate** | nothing — run the script |
 | "why doesn't it trigger", "it fires on the wrong things" | **Tune** | nothing — run the script |
+| "does this skill actually help", "test it", "run evals on it" | **Evaluate** | nothing — run the harness |
 | "improve this skill", "what went wrong with it", "read the feedback" | **Harvest** | `references/feedback-protocol.md` + `references/economy.md` |
 | "share this skill", "publish it", "get it ready to distribute" | **Package** | nothing — run the script |
 
@@ -183,7 +184,63 @@ cd "$OFFICIAL" && python3 -m scripts.run_loop \
 
 ---
 
-## Mode 4: Harvest
+## Mode 4: Evaluate
+
+Tune measures whether a skill *fires*. This measures whether it *helped*: the
+same prompts run with the skill and without it, graded side by side.
+
+Anthropic's official plugin ships the harness — subagent runs, a grader, a
+benchmark aggregator, a review UI. Delegated for the same reason as Mode 3: it
+is measurement machinery rather than guidance, so there is nothing here to keep
+in sync with it.
+
+```bash
+OFFICIAL="$(scripts/find-official.sh)" || exit 1
+```
+
+1. **Prompts.** Two or three tasks a real user would actually send — file paths,
+   real column names, the messy phrasing people type. Save to
+   `<skill>-workspace/evals.json` — the workspace is a sibling of the skill, not
+   a directory inside it, so the skill stays spec-clean. Assertions come later.
+2. **Both arms in one turn.** Per prompt, two subagents: one given the skill's
+   path, one given nothing (new skill) or a pre-edit snapshot (existing skill).
+   Outputs land in
+   `<skill>-workspace/iteration-<N>/<eval-name>/{with_skill,baseline}/outputs/`.
+   Spawning the baselines in a later turn costs a turn and buys nothing.
+3. **Draft assertions while they run**, into each run's `eval_metadata.json`.
+   Anything a script can check gets a script — it is reusable across iterations,
+   and this skill's rule about prose a regex could enforce applies to assertions
+   too. Subjective output does not get assertions; it gets the viewer.
+4. **Grade** against `$OFFICIAL/agents/grader.md` into `grading.json`. The
+   expectations array must use `text` / `passed` / `evidence` — the viewer reads
+   those exact field names.
+5. **Aggregate, then show the user before forming your own opinion:**
+   ```bash
+   (cd "$OFFICIAL" && python3 -m scripts.aggregate_benchmark \
+      <workspace>/iteration-<N> --skill-name <name> --skill-path <path>)
+   python3 "$OFFICIAL/eval-viewer/generate_review.py" <workspace>/iteration-<N> \
+      --skill-name <name> --benchmark <workspace>/iteration-<N>/benchmark.json &
+   ```
+   Add `--previous-workspace <…/iteration-<N-1>>` from iteration 2 on. Your
+   reading of the outputs is not the measurement; the user's is.
+6. **Capture `total_tokens` and `duration_ms`** from each task notification as it
+   arrives, into `timing.json` in that run's directory. Nothing else persists them.
+
+Then route the result back through this skill rather than around it. An edit the
+eval motivates is still placed by `references/economy.md` and still has to pass
+`scripts/validate.sh`. Compare `wc -l SKILL.md` against its pre-eval value: a
+skill that gained ten points of pass rate and forty lines of body has not
+obviously improved.
+
+Two findings worth naming out loud. An assertion that passes in **both** arms
+measures nothing about the skill — sharpen it or drop it. And a fix that only
+satisfies these two or three prompts is overfitting: the skill will run on
+prompts you never see, so prefer a reframing that explains *why* over a rule
+that pins the observed case.
+
+---
+
+## Mode 5: Harvest
 
 Applies to skills that have a `_feedback/`. This is what makes the folder worth
 having — without harvesting it is a graveyard, which is why it is opt-in rather
@@ -214,7 +271,7 @@ See `references/feedback-protocol.md` for the entry format.
 
 ---
 
-## Mode 5: Package
+## Mode 6: Package
 
 ```bash
 scripts/package.sh <path-to-skill> [out-dir]
@@ -227,6 +284,33 @@ it is the skill's improvement history and should travel with it.
 Then scans authored files for absolute home paths and secret-shaped strings and
 prints anything it finds. Those are for you to review, not for the script to
 decide: read every hit before sharing.
+
+---
+
+## Keeping the delegated harness current
+
+Tune and Evaluate call into the official plugin instead of restating it, which
+is what keeps them free. The cost of that trade is knowing when the thing you
+call has moved.
+
+```bash
+scripts/check-official.sh            # what moved since your review point
+scripts/check-official.sh --accept   # record the current upstream as reviewed, locally
+```
+
+Two review points, because they answer different questions. The one that ships with
+the skill — `scripts/official-baseline.tsv` — is the upstream these modes were
+*written against*, so a fresh install's first run reports whether the invocations
+here have gone stale. `--accept` never touches it; it writes a per-machine record
+into `_artifacts/`, which then takes precedence. Only this skill's maintainer moves
+the shipped pin, with `--pin`, after checking the invocations still match.
+
+What to do depends on what moved. A new file under `scripts/`, `agents/` or
+`eval-viewer/` is machinery — check whether a mode here should call it and
+adjust the invocation. A change to their `SKILL.md` is guidance: take the idea
+if it is right, in your own words, placed by `references/economy.md`. Never
+paste their prose in. Two skills saying the same thing twice have to be merged
+by hand forever, and this body is billed on every run.
 
 ---
 
@@ -277,8 +361,13 @@ entry there — regardless of whether the skill you were creating opted in.
 - Skipping the interview because the request "seems clear" — it answers at most two of the six questions
 - Writing a feedback entry for a run that went fine
 - Creating a `_feedback/` directory mid-run just to have somewhere to file an entry
+- Reading eval outputs yourself before putting the viewer in front of the user
+- Keeping an assertion that passes in both the with-skill and baseline arms
+- Tightening a skill until it satisfies the eval prompts instead of the task behind them
 - Harvesting feedback into "improve clarity" instead of a specific edit
 - Applying an entry's wording at the location the entry proposed, without weighing it against `economy.md`
+- Copying the official skill's prose in here instead of delegating to its scripts
+- Running `--pin` without checking that the delegated invocations still match
 - Marking entries resolved without making the edit
 
 ## Reference files
@@ -298,5 +387,6 @@ entry there — regardless of whether the skill you were creating opted in.
 |---|---|
 | `scripts/scaffold.sh <name> [parent] [--artifacts] [--feedback]` | Builds a spec-conformant tree. Validates the name, refuses to overwrite, creates underscore directories only when asked. `--feedback` also seeds `_feedback/README.md`, copies the entry template, and keeps the Feedback section in the generated `SKILL.md`. |
 | `scripts/validate.sh <path> [--errors-only]` | Spec + convention checks. Exit 1 on any ERROR. `--errors-only` suppresses WARN and ok lines — used by the SKILL.md edit hook so a clean file stays silent. |
-| `scripts/find-official.sh` | Prints the installed official skill-creator's directory, for Tune mode. Exit 1 with install guidance when the plugin is absent. |
+| `scripts/find-official.sh` | Prints the installed official skill-creator's directory, for Tune and Evaluate modes. Exit 1 with install guidance when the plugin is absent. |
 | `scripts/package.sh <path> [out]` | Validates, strips runtime output, scans for leaked paths and secrets. |
+| `scripts/check-official.sh [--accept\|--pin]` | Diffs the official plugin against your review point, classifying each change as machinery or guidance. `--accept` records it for this machine; `--pin` moves the shipped `scripts/official-baseline.tsv` and is the maintainer's call. |
