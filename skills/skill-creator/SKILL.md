@@ -200,20 +200,35 @@ OFFICIAL="$(scripts/find-official.sh)" || exit 1
 
 1. **Prompts.** Two or three tasks a real user would actually send — file paths,
    real column names, the messy phrasing people type. Save to
-   `<skill>-workspace/evals.json` — the workspace is a sibling of the skill, not
-   a directory inside it, so the skill stays spec-clean. Assertions come later.
-2. **Both arms in one turn.** Per prompt, two subagents: one given the skill's
-   path, one given nothing (new skill) or a pre-edit snapshot (existing skill).
-   Outputs land in
-   `<skill>-workspace/iteration-<N>/<eval-name>/{with_skill,baseline}/outputs/`.
-   Spawning the baselines in a later turn costs a turn and buys nothing.
-3. **Draft assertions while they run**, into each run's `eval_metadata.json`.
-   Anything a script can check gets a script — it is reusable across iterations,
-   and this skill's rule about prose a regex could enforce applies to assertions
-   too. Subjective output does not get assertions; it gets the viewer.
-4. **Grade** against `$OFFICIAL/agents/grader.md` into `grading.json`. The
-   expectations array must use `text` / `passed` / `evidence` — the viewer reads
-   those exact field names.
+   `<workspace>/evals.json`. Put the workspace **outside the skill's repository**,
+   not beside the skill: a skill's neighbours in a multi-skill repo are other
+   skills, so a workspace "next to" it lands in tracked source.
+2. **Build the tree with the script, not by hand:**
+   ```bash
+   scripts/eval-layout.sh init <workspace>/iteration-<N> <eval-name>...
+   ```
+   Then per prompt, two subagents **in one turn**: one given the skill's path, one
+   given nothing (new skill) or a pre-edit snapshot (existing skill). Each writes
+   to its own `<config>/run-1/outputs/`. Spawning the baselines in a later turn
+   costs a turn and buys nothing.
+3. **Draft assertions while they run**, into each eval's `eval_metadata.json`.
+   Anything a script can check gets a script — reusable across iterations, and
+   this skill's rule about prose a regex could enforce applies to assertions too.
+   Subjective output does not get assertions; it gets the viewer.
+
+   Before accepting an assertion, **name the arm you expect to fail it and why**.
+   An assertion you cannot imagine the baseline failing is decoration: today's
+   models clear "has valid frontmatter" without any skill, and eight such
+   assertions produce a confident 100%–100% tie that measured nothing. Aim them
+   at what the skill uniquely causes.
+4. **Grade** against `$OFFICIAL/agents/grader.md` into each run's `grading.json`,
+   then check the layout before trusting any number:
+   ```bash
+   scripts/eval-layout.sh check <workspace>/iteration-<N>
+   ```
+   Every requirement the aggregator has, it enforces by ignoring you — a wrong
+   directory name or a missing `summary` block yields `Delta +0.00` rather than an
+   error, which reads exactly like a real result. The script fails loudly instead.
 5. **Aggregate, then show the user before forming your own opinion:**
    ```bash
    (cd "$OFFICIAL" && python3 -m scripts.aggregate_benchmark \
@@ -223,8 +238,18 @@ OFFICIAL="$(scripts/find-official.sh)" || exit 1
    ```
    Add `--previous-workspace <…/iteration-<N-1>>` from iteration 2 on. Your
    reading of the outputs is not the measurement; the user's is.
-6. **Capture `total_tokens` and `duration_ms`** from each task notification as it
-   arrives, into `timing.json` in that run's directory. Nothing else persists them.
+6. **Capture the run's tokens and duration** from each task notification as it
+   arrives, into `timing.json` in that run's directory — `total_duration_seconds`
+   and `total_tokens` are the keys the aggregator reads, whatever the harness
+   called them on the way in. Nothing else persists them, and the notification
+   does not come twice.
+7. **Ask which assertions earned their place:**
+   ```bash
+   scripts/eval-layout.sh discriminate <workspace>/iteration-<N>
+   ```
+   Anything landing the same way in every arm measured the model or the task, not
+   the skill. Rewrite those before iteration 2, or the next tie will look like
+   evidence too.
 
 Then route the result back through this skill rather than around it. An edit the
 eval motivates is still placed by `references/economy.md` and still has to pass
@@ -232,11 +257,9 @@ eval motivates is still placed by `references/economy.md` and still has to pass
 skill that gained ten points of pass rate and forty lines of body has not
 obviously improved.
 
-Two findings worth naming out loud. An assertion that passes in **both** arms
-measures nothing about the skill — sharpen it or drop it. And a fix that only
-satisfies these two or three prompts is overfitting: the skill will run on
-prompts you never see, so prefer a reframing that explains *why* over a rule
-that pins the observed case.
+And a fix that satisfies only these two or three prompts is overfitting: the skill
+will run on prompts you never see, so prefer a reframing that explains *why* over a
+rule that pins the observed case.
 
 ---
 
@@ -362,7 +385,8 @@ entry there — regardless of whether the skill you were creating opted in.
 - Writing a feedback entry for a run that went fine
 - Creating a `_feedback/` directory mid-run just to have somewhere to file an entry
 - Reading eval outputs yourself before putting the viewer in front of the user
-- Keeping an assertion that passes in both the with-skill and baseline arms
+- Accepting an assertion without naming the arm you expect to fail it
+- Reading a benchmark number without having run `eval-layout.sh check` first
 - Tightening a skill until it satisfies the eval prompts instead of the task behind them
 - Harvesting feedback into "improve clarity" instead of a specific edit
 - Applying an entry's wording at the location the entry proposed, without weighing it against `economy.md`
@@ -389,4 +413,5 @@ entry there — regardless of whether the skill you were creating opted in.
 | `scripts/validate.sh <path> [--errors-only]` | Spec + convention checks. Exit 1 on any ERROR. `--errors-only` suppresses WARN and ok lines — used by the SKILL.md edit hook so a clean file stays silent. |
 | `scripts/find-official.sh` | Prints the installed official skill-creator's directory, for Tune and Evaluate modes. Exit 1 with install guidance when the plugin is absent. |
 | `scripts/package.sh <path> [out]` | Validates, strips runtime output, scans for leaked paths and secrets. |
+| `scripts/eval-layout.sh init\|check\|discriminate <iteration-dir>` | Builds the workspace tree the official aggregator expects, verifies it before aggregation, and after grading names the assertions that landed identically in every arm. Exists because every one of those failures is otherwise silent. |
 | `scripts/check-official.sh [--accept\|--pin]` | Diffs the official plugin against your review point, classifying each change as machinery or guidance. `--accept` records it for this machine; `--pin` moves the shipped `scripts/official-baseline.tsv` and is the maintainer's call. |
